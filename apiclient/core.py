@@ -25,8 +25,10 @@ class BaseRouter:
 
         for attr_name in dir(self):
             attr = getattr(self, attr_name)
-            if isinstance(attr, Endpoint):
-                attr.register(router=self)
+            if isinstance(attr, MarkedEndpoint):
+                endpoint = Endpoint(attr.func)
+                setattr(self, attr_name, endpoint)
+                endpoint.register(router=self)
         self._post_init(**kwargs)
 
     def _pre_init(self):
@@ -94,21 +96,23 @@ class Endpoint:
 
     def sync_call(self, httpx_request):
         response = self.session.send(httpx_request)
-        print(self.post_processors, response)
         for post_processor in self.post_processors:
             response = post_processor(response)
-            print(response)
         return response
 
     async def async_call(self, httpx_request):
         response = await self.session.send(httpx_request)
         for post_processor in self.post_processors:
-            if inspect.iscoroutinefunction(post_processor):
-                response = await post_processor(response)
-            else:
-                response = post_processor(response)
+            response = post_processor(response)
         return response
 
 
+class MarkedEndpoint:
+    __slots__ = ('func',)
+    def __init__(self, func):
+        self.func = func
+    def __call__(self, *args, **kwargs):
+        self.func(*args, **kwargs)
+
 def endpoint(func: _F) -> _F:
-    return Endpoint(func)
+    return MarkedEndpoint(func)
