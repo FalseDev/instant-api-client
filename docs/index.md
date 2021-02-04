@@ -28,6 +28,12 @@ class CodeExecClient(APIClient):
     # Also note the / prefix in the url
     return Post("/execute", params={'lang':language, 'code':code})
 
+
+# Using the API client
+from httpx import Client
+client = CodeExecClient(session=Client())
+response = client.run("py", "print('hello world!')")
+
 ```
 
 ## Documentation is under works
