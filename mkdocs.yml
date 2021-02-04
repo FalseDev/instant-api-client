@@ -1,0 +1,24 @@
+site_name: Instant API Client
+site_description: Create API wrappers/clients in minutes, enjoying both blocking and async interfaces from one codebase!
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: teal
+    accent: purple
+
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+
+plugins:
+  - search
+  - mkdocstrings:
+      handler: python
+
+nav:
+  - Introduction: index.md
+

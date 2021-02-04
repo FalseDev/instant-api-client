@@ -30,9 +30,9 @@ class Request:
         if self.absolute_url:
             url = self.url
         elif self.from_base_url:
-            url = router.client.base_url + self.url
+            url = router.base_url + self.url
         else:
-            url = router.client.base_url + router.path + self.url
+            url = router.base_url + getattr(router, 'path', '') + self.url
         req_dict['url'] = url
 
         return req_dict

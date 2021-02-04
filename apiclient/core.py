@@ -10,7 +10,13 @@ _F = TypeVar("_F")
 
 
 class BaseRouter:
-    def _initialize(self):
+    """Base class implementing 'route mounting' functionality"""
+    def _initialize(self, **kwargs):
+        """Looks for routers and routes and mount them
+
+        Also handles calling the _pre_init and _post_init hooks
+        """
+        self._pre_init()
         self_is_router = isinstance(self, APIRouter)
         client = self.client if self_is_router else self
         for attr_name, attr_type in getattr(self, '__annotations__', {}).items():
@@ -21,11 +27,14 @@ class BaseRouter:
             attr = getattr(self, attr_name)
             if isinstance(attr, Endpoint):
                 attr.register(router=self)
-        self._post_init()
+        self._post_init(**kwargs)
+
+    def _pre_init(self):
+        pass
 
     def _post_init(self, **kwargs):
         if kwargs:
-            raise RuntimeError("Unexpected arguments passed!")
+            raise RuntimeError("Unexpected argument {} passed!".format(next(iter(kwargs.keys()))))
 
 
 class APIClient(BaseRouter):
@@ -48,6 +57,7 @@ class APIRouter(BaseRouter):
     def __init__(self, client: APIClient):
         self.client = client
         self.session = client.session
+        self.base_url = client.base_url
         self._post_processors = []
         self._initialize()
 
@@ -76,7 +86,7 @@ class Endpoint:
     def __call__(self, *args, **kwargs):
         request = self.callback(self.router, *args, **kwargs)
 
-        httpx_request = self.session.build_request(**request.dict())
+        httpx_request = self.session.build_request(**request.dict(router=self.router))
 
         if inspect.iscoroutinefunction(self.session.send):
             return self.async_call(httpx_request)
@@ -84,8 +94,10 @@ class Endpoint:
 
     def sync_call(self, httpx_request):
         response = self.session.send(httpx_request)
+        print(self.post_processors, response)
         for post_processor in self.post_processors:
             response = post_processor(response)
+            print(response)
         return response
 
     async def async_call(self, httpx_request):
