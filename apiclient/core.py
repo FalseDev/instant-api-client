@@ -114,5 +114,9 @@ class MarkedEndpoint:
     def __call__(self, *args, **kwargs):
         self.func(*args, **kwargs)
 
+import os
+DOCS = os.environ.get("DOCS", False)
 def endpoint(func: _F) -> _F:
+    if DOCS:
+        return func
     return MarkedEndpoint(func)
