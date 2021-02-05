@@ -8,7 +8,7 @@ with open("requirements.txt", "r", encoding="utf-8") as req_file:
 
 setuptools.setup(
     name="instant-api-client",
-    version="0.1.1",
+    version="0.1.2",
     author="FalseDev",
     license="MIT",
     description="Create API wrappers/clients in minutes, enjoying both blocking and async interfaces from one codebase!",
