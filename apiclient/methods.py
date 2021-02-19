@@ -23,16 +23,16 @@ class Request:
     absolute_url: bool = False
     from_base_url: bool = False
 
-    def dict(self, *, router: APIRouter):
+    def dict(self, *, parent: APIRouter):
         req_dict = {k: getattr(self, k) for k in (
             'method', 'headers', 'params', 'data', 'json', 'files', 'cookies')}
 
         if self.absolute_url:
             url = self.url
         elif self.from_base_url:
-            url = router.base_url + self.url
+            url = parent.base_url + self.url
         else:
-            url = router.base_url + getattr(router, 'path', '') + self.url
+            url = parent.url + self.url
         req_dict['url'] = url
 
         return req_dict
