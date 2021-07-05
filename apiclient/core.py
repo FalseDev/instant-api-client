@@ -67,8 +67,7 @@ class RouterMeta(type):
             for name, endpoint in attrs.items()
             if isinstance(endpoint, Endpoint)
         }
-        self = super().__new__(cls, name, bases, attrs, **kwargs)
-        return self
+        return super().__new__(cls, name, bases, attrs, **kwargs)
 
 
 class RouterBase(metaclass=RouterMeta, no_init=True):
